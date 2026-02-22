@@ -19,6 +19,7 @@ import ResponsiveLayout, { ResponsiveGrid, ResponsiveCard, ResponsiveButton, Res
 import SmartSuggestions from './components/SmartSuggestions';
 import RealTimeComments from './components/RealTimeComments';
 import MultiLanguageSupport from './components/MultiLanguageSupport';
+import WorkItemsBrowser from './components/WorkItemsBrowser';
 
 // API base URL - hardcoded for Vercel backend
 const API_BASE_URL = 'https://backend-new-bagaent1.vercel.app';
@@ -1593,9 +1594,7 @@ const Sidebar = ({
           }`}
         >
           <Folder className="w-4 h-4" />
-            <span className="font-medium text-sm">
-              Documents ({filteredDocuments.length})
-            </span>
+          <span className="font-medium text-sm">Documents ({filteredDocuments.length})</span>
         </button>
         
         <button
@@ -1607,9 +1606,18 @@ const Sidebar = ({
           }`}
         >
           <Clock className="w-4 h-4" />
-            <span className="font-medium text-sm">
-              Past Analyses ({filteredAnalyses.length})
-            </span>
+          <span className="font-medium text-sm">Past Analyses ({filteredAnalyses.length})</span>
+        </button>
+        <button
+          onClick={() => setActiveSection('work-items')}
+          className={`w-full p-3 rounded-xl flex items-center gap-3 transition-all duration-200 ${
+            activeSection === 'work-items' 
+              ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm' 
+              : 'text-gray-700 hover:bg-gray-50 hover:shadow-sm'
+          }`}
+        >
+          <Settings className="w-4 h-4" />
+          <span className="font-medium text-sm">Work Items</span>
         </button>
       </div>
       
@@ -1626,6 +1634,12 @@ const Sidebar = ({
           <Settings className="w-4 h-4" />
           <span className="font-medium text-sm">Admin Portal</span>
         </button>
+        {/* Render Work Items section outside of button */}
+        {activeSection === 'work-items' && (
+          <div className="space-y-4">
+            <WorkItemsBrowser />
+          </div>
+        )}
         
         <button
           onClick={onLogout}

@@ -3949,13 +3949,6 @@ function MainApp() {
         </div>
       )}
 
-      {/* OneDrive Picker Modal */}
-      <OneDrivePicker
-        isVisible={showOneDrivePicker}
-        onFileSelect={handleOneDriveFileSelect}
-        onClose={closeOneDrivePicker}
-        title="Select Document from OneDrive"
-      />
     </div>
   );
 }

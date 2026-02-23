@@ -12,7 +12,6 @@ import JSZip from 'jszip';
 import LoginPage from './LoginPage';
 import ReactFlowDiagram from './components/ReactFlowDiagram';
 import { generateSystemArchitectureDiagram, generateDatabaseDiagram, generateUserFlowDiagram } from './utils/diagramGenerator';
-import OneDrivePicker from './components/OneDrivePicker';
 import EnhancedDocumentViewer from './components/EnhancedDocumentViewer';
 import AdvancedSearch from './components/AdvancedSearch';
 import ResponsiveLayout, { ResponsiveGrid, ResponsiveCard, ResponsiveButton, ResponsiveModal } from './components/ResponsiveLayout';
@@ -63,101 +62,6 @@ class ErrorBoundary extends React.Component {
 
 // --- Enhanced Helper Components ---
 
-function OneDriveStatusIndicator() {
-  const [status, setStatus] = useState('checking');
-  const [message, setMessage] = useState('');
-
-  const checkStatus = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/integrations/onedrive/status`);
-      if (response.status === 401) {
-        setStatus('not_authenticated');
-        setMessage('Please log in to check OneDrive status');
-        return;
-      }
-      
-      const data = await response.json();
-      if (data.configured === false) {
-        setStatus('not_configured');
-        setMessage('OneDrive not configured');
-      } else if (data.user_connected) {
-        setStatus('connected');
-        setMessage('Connected to OneDrive');
-      } else {
-        setStatus('not_connected');
-        setMessage('Not connected to OneDrive');
-      }
-    } catch (error) {
-      setStatus('error');
-      setMessage('Failed to check status');
-    }
-  };
-
-  useEffect(() => {
-    checkStatus();
-    
-    // Listen for refresh events
-    const handleRefresh = () => checkStatus();
-    window.addEventListener('onedrive-status-refresh', handleRefresh);
-    
-    // Check status every 30 seconds
-    const interval = setInterval(checkStatus, 30000);
-    
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('onedrive-status-refresh', handleRefresh);
-    };
-  }, []);
-
-  const getStatusIcon = () => {
-    switch (status) {
-      case 'connected':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case 'not_connected':
-        return <XCircle className="w-4 h-4 text-orange-500" />;
-      case 'not_configured':
-        return <XCircle className="w-4 h-4 text-red-500" />;
-      case 'not_authenticated':
-        return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
-      case 'error':
-        return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
-      default:
-        return <div className="w-4 h-4 border-2 border-blue-300 border-t-transparent rounded-full animate-spin"></div>;
-    }
-  };
-
-  const getStatusText = () => {
-    switch (status) {
-      case 'connected':
-        return 'Connected';
-      case 'not_connected':
-        return 'Not Connected';
-      case 'not_configured':
-        return 'Not Configured';
-      case 'not_authenticated':
-        return 'Please Login';
-      case 'error':
-        return 'Error';
-      default:
-        return 'Checking...';
-    }
-  };
-
-  return (
-    <div className="flex items-center gap-1 text-xs">
-      {getStatusIcon()}
-      <span className={`font-medium ${
-        status === 'connected' ? 'text-green-600' : 
-        status === 'not_connected' ? 'text-orange-600' : 
-        status === 'not_configured' ? 'text-red-600' : 
-        status === 'not_authenticated' ? 'text-yellow-600' : 
-        status === 'error' ? 'text-yellow-600' : 'text-blue-600'
-      }`}>
-        {getStatusText()}
-      </span>
-    </div>
-  );
-}
 
 function MarkdownRenderer({ markdown, title, className = "" }) {
   const sanitizedMarkdown = markdown || 'No content generated.';
@@ -2406,9 +2310,6 @@ function MainApp() {
   const [statusFilter, setStatusFilter] = useState('all'); // all, completed, in-progress, pending
 
   // OneDrive Integration State
-  const [showOneDrivePicker, setShowOneDrivePicker] = useState(false);
-  const [onedriveFiles, setOnedriveFiles] = useState([]);
-  const [onedriveLoading, setOnedriveLoading] = useState(false);
   const [showUploadContainer, setShowUploadContainer] = useState(true);
 
   // Full Analysis Modal State
@@ -2979,8 +2880,7 @@ function MainApp() {
       window.URL.revokeObjectURL(url);
     });
   };
-
-  const handleSendForApproval = async () => {
+    const handleSendForApproval = async () => {
     if (!results) return;
     
     try {
@@ -3851,47 +3751,6 @@ function MainApp() {
                     Upload your business requirements document (PDF or DOCX) to generate comprehensive analysis including technical requirements, diagrams, and project backlog.
                   </p>
 
-                  {/* OneDrive Integration */}
-                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Cloud className="w-5 h-5 text-blue-600" />
-                        <span className="text-sm font-medium text-blue-800">OneDrive Integration</span>
-                        <OneDriveStatusIndicator />
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={handleConnectOneDrive}
-                          className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
-                        >
-                          <Cloud className="w-4 h-4" />
-                          Connect OneDrive
-                        </button>
-                        <button
-                          type="button"
-                          onClick={openOneDrivePicker}
-                          disabled={isProcessing || onedriveLoading}
-                          className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                          {onedriveLoading ? (
-                            <>
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                              Loading...
-                            </>
-                          ) : (
-                            <>
-                              <Cloud className="w-4 h-4" />
-                              Select from OneDrive
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    <p className="text-xs text-blue-600 mt-2">
-                      Connect your OneDrive account to access and import documents directly for analysis.
-                    </p>
-                  </div>
 
                   {isProcessing && <ProgressStepper />}
 

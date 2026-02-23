@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 
-const API_BASE = import.meta.env.VITE_API_URL || process.env.REACT_APP_API_URL || '';
+const API_BASE = 'https://backend-new-bagaent1.vercel.app';
 
 const PLATFORM_OPTIONS = [
   { label: 'Azure DevOps', value: 'ado', icon: '⚡' },

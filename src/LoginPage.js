@@ -89,12 +89,12 @@ const LoginPage = ({ onLogin }) => {
               <div className="text-center mb-8">
                 <div className="inline-flex items-center justify-center w-32 h-16 mb-4">
                   <img 
-                    src="/images/logo.jpg" 
+                    src="/images/ValueMomentumlogo_12021110205095020211102051808.png" 
                     alt="ValueMomentum Logo" 
                     className="w-32 h-16 object-contain"
                     onError={(e) => {
                       console.log('Logo failed to load, trying fallback');
-                      e.target.src = '/images/ValueMomentumlogo_12021110205095020211102051808.jpg';
+                      e.target.src = '/images/ValueMomentumlogo_12021110205095020211102051808.png';
                     }}
                   />
                 </div>
